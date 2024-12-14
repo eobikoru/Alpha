@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: [ 'antd', '@ant-design', 'rc-util', 'rc-pagination', 'rc-picker', 'rc-notification', 'rc-tooltip' ],
-  webpack: config => {
+  webpack: (config: { externals: string[]; }) => {
     config.externals.push('pino-pretty', 'lokijs', 'encoding')
     return config
   },
