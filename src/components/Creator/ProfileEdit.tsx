@@ -1,9 +1,9 @@
 "use client";
-
-import React, { useState, useEffect, ChangeEvent } from "react";
+import { ClipLoader } from "react-spinners";
+import React, { ChangeEvent, useState } from "react";
 import {
-  CardContent,
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
   CardFooter,
@@ -12,13 +12,13 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { useRouter } from "next/navigation";
 import { useWriteContract } from "wagmi";
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/constant/constant";
-import { ClipLoader } from "react-spinners";
+import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constant/constant";
+import Profile from "./Profile";
 
-const CreatorRegistration = () => {
-  const router = useRouter();
+const ProfileEdit = () => {
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
   const { writeContract, isPending } = useWriteContract();
 
   const [formData, setFormData] = useState({
@@ -28,13 +28,6 @@ const CreatorRegistration = () => {
     twitterHandle: "",
     githubHandle: "",
   });
-
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-
-  useEffect(() => {
-    const isFormIncomplete = Object.values(formData).some((value) => !value);
-    setIsButtonDisabled(isFormIncomplete);
-  }, [formData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -112,7 +105,7 @@ const CreatorRegistration = () => {
       const result = await writeContract({
         abi: CONTRACT_ABI,
         address: CONTRACT_ADDRESS,
-        functionName: "registerCreator",
+        functionName: "editProfile",
         args: [
           formData.name,
           formData.bio,
@@ -122,106 +115,95 @@ const CreatorRegistration = () => {
         ],
       });
       console.log(result);
-      router.push(`/creator`);
     } catch (error) {
       console.error(error);
     }
+
+    setIsEditing(false);
   };
 
-  return (
-    <Card className="max-w-lg mx-auto mt-10 mb-32">
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleBackClick = () => {
+    setIsEditing(false);
+  };
+
+  return isEditing ? (
+    <Card>
       <CardHeader>
-        <CardTitle>Creator Registration</CardTitle>
+        <CardTitle>Edit Profile</CardTitle>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          {/* Name */}
+        <form className="space-y-4">
           <div>
             <Label htmlFor="name">Name</Label>
             <Input
-              type="text"
               id="name"
-              placeholder="Enter your name"
               value={formData.name}
               onChange={handleChange}
+              placeholder="Your name"
             />
           </div>
-
-          {/* Bio */}
           <div>
             <Label htmlFor="bio">Bio</Label>
             <Textarea
               id="bio"
-              placeholder="Write a short bio about yourself"
               value={formData.bio}
               onChange={handleChange}
+              placeholder="Tell us about yourself"
             />
           </div>
-
-          {/* Photo Hash */}
           <div>
-            <Label htmlFor="imageUpload">Upload photo</Label>
+            <Label htmlFor="photoHash">Upload photo</Label>
             <Input
               type="file"
-              id="imageUpload"
-              name="imageUpload"
+              id="photoHash"
+              name="photoHash"
               accept="image/png, image/jpg, image/jpeg, image/webp"
               onChange={changeHandler}
+              placeholder="Select an image file"
             />
           </div>
-
-          {/* Twitter Handle */}
           <div>
-            <Label htmlFor="twitterHandle">Twitter Handle</Label>
+            <Label htmlFor="twitter">Twitter</Label>
             <Input
-              type="text"
-              id="twitterHandle"
-              placeholder="Enter your Twitter handle"
+              id="twitter"
               value={formData.twitterHandle}
               onChange={handleChange}
+              placeholder="Your Twitter handle"
             />
           </div>
-
-          {/* GitHub Handle */}
           <div>
-            <Label htmlFor="githubHandle">GitHub Handle</Label>
+            <Label htmlFor="github">GitHub</Label>
             <Input
-              type="text"
-              id="githubHandle"
-              placeholder="Enter your GitHub handle"
+              id="github"
               value={formData.githubHandle}
               onChange={handleChange}
+              placeholder="Your GitHub username"
             />
           </div>
-
-          <CardFooter>
-            <div className="w-full flex justify-end">
-              <Button
-                type="submit"
-                variant="default"
-                size="default"
-                disabled={isButtonDisabled}
-                className={
-                  isButtonDisabled
-                    ? "opacity-50 cursor-not-allowed"
-                    : "cursor-pointer"
-                }
-              >
-                {isPending ? (
-                  <span className="flex items-center">
-                    <ClipLoader size={14} color="#fff" className="mr-2" />{" "}
-                    Submitting...
-                  </span>
-                ) : (
-                  "Submit"
-                )}
-              </Button>
-            </div>
-          </CardFooter>
+          <div className="flex justify-end space-x-4">
+            <Button type="button" onClick={handleSubmit}>
+              {isPending ? (
+                <span className="flex items-center">
+                  <ClipLoader size={14} color="#fff" className="mr-2" /> Saving
+                </span>
+              ) : (
+                "Save Profile"
+              )}
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleBackClick}>
+              Back
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
+  ) : (
+    <Profile handleEditClick={handleEditClick} />
   );
 };
 
-export default CreatorRegistration;
+export default ProfileEdit;

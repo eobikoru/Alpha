@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Insights from "./Insights";
 import Consultation from "../LandingPage/Consultation";
 import ManageTool from "./ManageTool";
-import Profile from "./Profile";
+import Profile from "./ProfileEdit";
 
 const CreatorPage = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks

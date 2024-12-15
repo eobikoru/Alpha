@@ -1,10 +1,10 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { liskSepolia } from "viem/chains";
+import { kairos } from "viem/chains";
 
 const config = getDefaultConfig({
-  appName: "Cre8ify",
+  appName: "Alpha",
   projectId: "YOUR_PROJECT_ID",
-  chains: [liskSepolia],
+  chains: [kairos],
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
 
