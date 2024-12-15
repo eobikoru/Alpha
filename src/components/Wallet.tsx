@@ -95,9 +95,9 @@ export const Wallet = ({ children }: { children: ReactNode }) => {
                   </button>
                   <button onClick={openAccountModal} type="button">
                     {account.displayName}
-                    {account.displayBalance
+                    {/* {account.displayBalance
                       ? ` (${account.displayBalance})`
-                      : ""}
+                      : ""} */}
                   </button>
                 </div>
               );
