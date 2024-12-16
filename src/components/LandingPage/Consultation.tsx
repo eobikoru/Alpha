@@ -6,14 +6,36 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useWriteContract } from "wagmi";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constant/constant";
+import { message } from "antd";
 const Consultation = () => {
-  const { writeContract, isPending } = useWriteContract();
+  const { writeContract,  isPending, isError, isSuccess } = useWriteContract();
   const [formData, setFormData] = useState({
     availability: "",
     consultationPrice: "",
   });
-
+  const [messageApi] = message.useMessage();
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  // Success Message
+  useEffect(() => {
+    if (isSuccess) {
+      messageApi.open({
+        type: "success",
+        content: "Tool added successfully!",
+      });
+      setFormData({
+        availability: "",
+        consultationPrice: "",
+      });
+    }
+  }, [isSuccess, messageApi]);
+  useEffect(() => {
+    if (isError) {
+      messageApi.open({
+        type: "error",
+        content: "This operation failed",
+      });
+    }
+  }, [isError, messageApi]);
 
   // Enable/disable the button based on form completeness
   useEffect(() => {
@@ -39,7 +61,7 @@ const Consultation = () => {
         abi: CONTRACT_ABI,
         address: CONTRACT_ADDRESS,
         functionName: "setConsultationAvailability",
-        args: [], 
+        args: [formData.availability, formData. consultationPrice], 
       });
       console.log(result);
   
