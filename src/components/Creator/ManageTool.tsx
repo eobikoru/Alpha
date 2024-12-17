@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "../ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constant/constant";
 import { useWriteContract } from "wagmi";
@@ -36,6 +35,7 @@ const ManageTool = () => {
       });
     }
   }, [isSuccess, messageApi]);
+
   useEffect(() => {
     if (isError) {
       messageApi.open({
@@ -96,7 +96,7 @@ const ManageTool = () => {
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
-                <Label htmlFor="toolName">Tool Name</Label>
+                <label htmlFor="toolName">Tool Name</label>
                 <Input
                   id="toolName"
                   placeholder="Enter tool name"
@@ -105,7 +105,7 @@ const ManageTool = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="toolDescription">Description</Label>
+                <label htmlFor="toolDescription">Description</label>
                 <Textarea
                   id="toolDescription"
                   placeholder="Describe your tool"
@@ -114,7 +114,7 @@ const ManageTool = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="toolCategory">Category</Label>
+                <label htmlFor="toolCategory">Category</label>
                 <Input
                   id="toolCategory"
                   placeholder="e.g., DeFi, NFT, DAO"
@@ -123,7 +123,7 @@ const ManageTool = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="toolPrice">Price (in ETH)</Label>
+                <label htmlFor="toolPrice">Price (in ETH)</label>
                 <Input
                   id="toolPrice"
                   type="number"

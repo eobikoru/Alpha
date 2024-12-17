@@ -1,12 +1,10 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { liskSepolia } from "viem/chains";
-import {
-  baseSepolia,
-} from "wagmi/chains";
+
+import { kairos } from "viem/chains";
 const config = getDefaultConfig({
   appName: "Alpha",
   projectId: "YOUR_PROJECT_ID",
-  chains: [liskSepolia,baseSepolia],
+  chains: [kairos],
   ssr: true, // If your dApp uses server side rendering (SSR)
 });
 

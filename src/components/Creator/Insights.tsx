@@ -25,7 +25,7 @@ const chartData = [
 ];
 
 const Insights = () => {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
 
   const { data, isLoading } = useReadContract({
     abi: CONTRACT_ABI,

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 import { socials } from "./socials";
 
 const Footer = () => {
@@ -9,7 +9,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap justify-between items-center">
           <div className="w-full md:w-1/3 mb-6 md:mb-0">
-            <Image src="/logo.svg" alt="Logo" width={40} height={40} />
+            {/* <Image src="/logo.svg" alt="Logo" width={40} height={40} /> */}
             <p className="mt-2 text-blue-200">
               Empowering Web3 creators since 2023
             </p>
