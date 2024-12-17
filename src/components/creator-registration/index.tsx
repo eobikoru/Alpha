@@ -13,7 +13,7 @@ import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-import { useWriteContract } from "wagmi";
+import { useWriteContract, useTransactionReceipt, useWaitForTransactionReceipt  } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/constant/constant";
 import { ClipLoader } from "react-spinners";
 import { message } from "antd";
@@ -29,8 +29,10 @@ interface FormData {
 
 const CreatorRegistration = () => {
   const router = useRouter();
-  const { writeContract, isPending, isError, isSuccess } = useWriteContract();
-
+  const { writeContract, data:hash, isPending, isError, isSuccess } = useWriteContract();
+  const { isLoading, isSuccess:isSuccessHash} = useWaitForTransactionReceipt({
+    hash, 
+  });
   const [formData, setFormData] = useState<FormData>({
     name: "",
     bio: "",
@@ -51,7 +53,7 @@ const CreatorRegistration = () => {
 
   // Handle success or error messages
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccessHash) {
       showSuccess("Operation successful!");
       resetForm();
       router.push("/creator");
@@ -60,7 +62,7 @@ const CreatorRegistration = () => {
     if (isError) {
       showError("This operation failed");
     }
-  }, [isSuccess, isError, messageApi, router]);
+  }, [isSuccessHash, isError, messageApi, router]);
 
   // Disable Submit Button Logic
   useEffect(() => {
