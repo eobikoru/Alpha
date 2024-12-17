@@ -123,7 +123,7 @@ const ManageTool = () => {
                 />
               </div>
               <div>
-                <label htmlFor="toolPrice">Price (in ETH)</label>
+                <label htmlFor="toolPrice">Price (in KAIA)</label>
                 <Input
                   id="toolPrice"
                   type="number"

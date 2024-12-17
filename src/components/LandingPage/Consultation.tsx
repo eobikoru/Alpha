@@ -3,49 +3,52 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useWriteContract } from "wagmi";
+import { useWriteContract ,useWaitForTransactionReceipt} from "wagmi";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constant/constant";
 import { message } from "antd";
-import CustomDatePicker from '../ui/datepicker';
-import { Dayjs } from "dayjs";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Consultation = () => {
-  const { writeContract, isPending, isSuccess } = useWriteContract();
+  const { writeContract,data:hash, isPending, isSuccess } = useWriteContract();
   const [formData, setFormData] = useState({
     consultationPrice: "",
-    availableSlots: [] as number[]
+    availableSlots: [] as number[],
   });
   const [messageApi, contextHolder] = message.useMessage();
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const {isLoading, isSuccess:isSuccessHash} = useWaitForTransactionReceipt({
+    hash,
+  })
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccessHash) {
       messageApi.open({
         type: "success",
         content: "Operation successful!",
       });
 
-      // Reset form data
       setFormData({
         consultationPrice: "",
-        availableSlots: []
+        availableSlots: [],
       });
+      setSelectedDate(null); 
     }
-  }, [isSuccess, messageApi]);
+  }, [isSuccessHash, messageApi]);
+
 
   useEffect(() => {
-    const isFormIncomplete = Object.values(formData).some((value) => !value);
+    const isFormIncomplete = Object.values(formData).some((value) => !value || value.length === 0);
     setIsButtonDisabled(isFormIncomplete);
   }, [formData]);
 
-  const toUnixTimestamp = (isoDate: string): number => {
-    const date = new Date(isoDate);
+  // Convert ISO date to Unix timestamp
+  const toUnixTimestamp = (date: Date): number => {
     return Math.floor(date.getTime() / 1000);
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  // Handle input change
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -53,16 +56,24 @@ const Consultation = () => {
     }));
   };
 
-  const handleDateChange = (date: Dayjs | null) => {
+  // Handle date selection
+  const handleDateChange = (date: Date | null) => {
+    setSelectedDate(date); // Update selected date for display
     if (date) {
-      const timestamp = toUnixTimestamp(date.format());
+      const timestamp = toUnixTimestamp(date);
       setFormData((prev) => ({
         ...prev,
-        availableSlots: [timestamp]
+        availableSlots: [timestamp],
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        availableSlots: [],
       }));
     }
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -70,20 +81,16 @@ const Consultation = () => {
         abi: CONTRACT_ABI,
         address: CONTRACT_ADDRESS,
         functionName: "setConsultationAvailability",
-        args: [
-          true,
-          formData.consultationPrice,
-          formData.availableSlots
-        ],
+        args: [true, formData.consultationPrice, formData.availableSlots],
       });
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
   };
 
   return (
     <div>
-       {contextHolder}
+      {contextHolder}
       <Card>
         <CardHeader>
           <CardTitle>Manage Availability</CardTitle>
@@ -93,11 +100,18 @@ const Consultation = () => {
             <div>
               <Label>Available Slots</Label>
               <div>
-                <CustomDatePicker
-                  onChange={handleDateChange}
-                  placeholder="Select date and time"
-                />
+                 <DatePicker
+                selected={selectedDate}
+                onChange={handleDateChange}
+                placeholderText="Select date and time"
+                isClearable
+                showTimeSelect
+                timeFormat="HH:mm"
+                dateFormat="MMMM d, yyyy h:mm aa"
+                className="border w-full px-3 py-2 rounded"
+              />
               </div>
+             
             </div>
             <div>
               <Label htmlFor="consultationPrice">Hourly Rate (in Kaia)</Label>
