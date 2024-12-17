@@ -1,45 +1,151 @@
 "use client";
-import { ClipLoader } from "react-spinners";
-import React, { ChangeEvent, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "../ui/card";
+
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { useWriteContract } from "wagmi";
+import { ClipLoader } from "react-spinners";
+import { useWriteContract, useAccount, useReadContract } from "wagmi";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constant/constant";
 import Profile from "./Profile";
+import { message } from "antd";
 
 const ProfileEdit = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const { address } = useAccount();
 
-  const { writeContract, isPending } = useWriteContract();
+  const { data } = useReadContract({
+    abi: CONTRACT_ABI,
+    address: CONTRACT_ADDRESS,
+    functionName: "getCreatorProfile",
+    args: [address],
+  });
 
-  const [formData, setFormData] = useState({
+  const [messageApi, contextHolder] = message.useMessage();
+  const { writeContract, isPending, isError, isSuccess } = useWriteContract();
+
+  // State for form data
+  const [formData, setFormData] = useState<{
+    name: string;
+    bio: string;
+    photoHash: string; // Updated to hold IPFS hash only
+    twitterHandle: string;
+    githubHandle: string;
+  }>({
     name: "",
     bio: "",
-    photoHash: null,
+    photoHash: "",
     twitterHandle: "",
     githubHandle: "",
   });
 
-  const handleChange = (
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Display success message
+  useEffect(() => {
+    if (successMessage) {
+      messageApi.open({
+        type: "success",
+        content: successMessage,
+      });
+      setSuccessMessage(null);
+    }
+  }, [successMessage, messageApi]);
+
+  // Display error message
+  useEffect(() => {
+    if (errorMessage) {
+      messageApi.open({
+        type: "error",
+        content: errorMessage,
+      });
+      setErrorMessage(null);
+    }
+  }, [errorMessage, messageApi]);
+
+  // Handle contract submission success and errors
+  useEffect(() => {
+    if (isSuccess) {
+      setSuccessMessage("Profile updated successfully!");
+      setTimeout(() => {
+        setIsEditing(false);
+      }, 1500);
+    }
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (isError) {
+      setErrorMessage("This operation failed.");
+    }
+  }, [isError]);
+
+  // Set form data from contract
+  useEffect(() => {
+    if (data) {
+      setFormData({
+        name: data.name || "",
+        bio: data.bio || "",
+        photoHash: data.photoHash || "",
+        twitterHandle: data.twitterHandle || "",
+        githubHandle: data.githubHandle || "",
+      });
+    }
+  }, [data]);
+
+  // Handle file upload and set IPFS hash
+  const handleSubmission = async (fileToUpload: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", fileToUpload);
+
+      const metadata = JSON.stringify({ name: fileToUpload.name });
+      formData.append("pinataMetadata", metadata);
+
+      const options = JSON.stringify({ cidVersion: 0 });
+      formData.append("pinataOptions", options);
+
+      const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
+        },
+        body: formData,
+      });
+
+      const resData = await res.json();
+      const ipfsHash = resData.IpfsHash;
+
+      setFormData((prev) => ({
+        ...prev,
+        photoHash: ipfsHash, // Save only the IPFS hash
+      }));
+
+      setSuccessMessage("File uploaded successfully!");
+    } catch (error) {
+      setErrorMessage("File upload failed.");
+      console.error(error);
+    }
+  };
+
+  // Handle input changes
+  const handleChange = async (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { id, value } = e.target;
 
     if (e.target instanceof HTMLInputElement && e.target.type === "file") {
       const files = e.target.files;
-      setFormData((prev) => ({
-        ...prev,
-        [id]: files ? files[0] : null,
-      }));
+
+      if (files && files[0]) {
+        try {
+          await handleSubmission(files[0]); // Upload file to IPFS
+        } catch (error) {
+          setErrorMessage("File upload failed.");
+        }
+      }
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -48,61 +154,17 @@ const ProfileEdit = () => {
     }
   };
 
-  const changeHandler = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      await handleSubmission(selectedFile);
-    }
-  };
-
-  const handleSubmission = async (fileToUpload: string | Blob) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", fileToUpload);
-      const metadata = JSON.stringify({
-        name: "File name",
-      });
-      formData.append("pinataMetadata", metadata);
-
-      const options = JSON.stringify({
-        cidVersion: 0,
-      });
-      formData.append("pinataOptions", options);
-
-      const res = await fetch(
-        "https://api.pinata.cloud/pinning/pinFileToIPFS",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`,
-          },
-          body: formData,
-        }
-      );
-
-      const resData = await res.json();
-      const ipfsHash = resData.IpfsHash;
-
-      setFormData((prev) => ({
-        ...prev,
-        photoHash: ipfsHash,
-      }));
-    } catch (e) {
-      alert("Trouble uploading file");
-    }
-  };
-
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted!", formData);
 
     if (!formData.photoHash) {
-      alert("Please upload an image first");
+      setErrorMessage("Please upload an image first.");
       return;
     }
 
     try {
-      const result = await writeContract({
+      await writeContract({
         abi: CONTRACT_ABI,
         address: CONTRACT_ADDRESS,
         functionName: "editProfile",
@@ -114,12 +176,10 @@ const ProfileEdit = () => {
           formData.githubHandle,
         ],
       });
-      console.log(result);
     } catch (error) {
+      setErrorMessage("An error occurred while saving your profile.");
       console.error(error);
     }
-
-    setIsEditing(false);
   };
 
   const handleEditClick = () => {
@@ -132,11 +192,12 @@ const ProfileEdit = () => {
 
   return isEditing ? (
     <Card>
+      {contextHolder}
       <CardHeader>
         <CardTitle>Edit Profile</CardTitle>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <Label htmlFor="name">Name</Label>
             <Input
@@ -161,15 +222,15 @@ const ProfileEdit = () => {
               type="file"
               id="photoHash"
               name="photoHash"
-              accept="image/png, image/jpg, image/jpeg, image/webp"
-              onChange={changeHandler}
+              accept="image/*"
+              onChange={handleChange}
               placeholder="Select an image file"
             />
           </div>
           <div>
             <Label htmlFor="twitter">Twitter</Label>
             <Input
-              id="twitter"
+              id="twitterHandle"
               value={formData.twitterHandle}
               onChange={handleChange}
               placeholder="Your Twitter handle"
@@ -178,14 +239,14 @@ const ProfileEdit = () => {
           <div>
             <Label htmlFor="github">GitHub</Label>
             <Input
-              id="github"
+              id="githubHandle"
               value={formData.githubHandle}
               onChange={handleChange}
               placeholder="Your GitHub username"
             />
           </div>
           <div className="flex justify-end space-x-4">
-            <Button type="button" onClick={handleSubmit}>
+            <Button type="submit">
               {isPending ? (
                 <span className="flex items-center">
                   <ClipLoader size={14} color="#fff" className="mr-2" /> Saving
