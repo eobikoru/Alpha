@@ -6,15 +6,15 @@ export const FeaturesUtil = [
     icon: "🧰",
   },
   {
-    title: "NFT Consultations",
+    title: "Consultations",
     description:
-      "Offer one-on-one sessions to share your insights on NFTs, DAOs, and emerging Web3 technologies.",
+      "Offer one-on-one sessions to share your insights on Blockchain projects, AI agents, and emerging Web3 technologies.",
     icon: "💎",
   },
   {
     title: "Decentralized Profiles",
     description:
-      "Create a stunning on-chain profile to showcase your Web3 knowledge and services.",
+      "Create a stunning on-chain profile to showcase your valuable knowledge and services.",
     icon: "🌐",
   },
 ];

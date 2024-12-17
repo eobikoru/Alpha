@@ -2,12 +2,12 @@ export const FaqUtil = [
   {
     question: "What is Alpha?",
     answer:
-      "Alpha is a Web3-native platform where creators and Key Opinion Leaders (KOLs) monetize their expertise by sharing curated tools and offering time for consultations or mentorship sessions.",
+      "Alpha is a platform where creators and Key Opinion Leaders (KOLs) monetize their expertise by sharing curated tools and offering time for consultations to users.",
   },
   {
     question: "How can creators earn on Alpha?",
     answer:
-      "Creators can: Sell curated lists of Web3 tools with personal insights, offer time slots for one-on-one consultations or mentorship, and share unique links to their profiles or offerings on social media.",
+      "Creators can sell curated lists of Web3 tools with personal insights, offer time slots for one-on-one consultations or mentorship, and share unique links to their profiles or offerings on social media.",
   },
   {
     question: "How do time bookings work?",
@@ -22,7 +22,7 @@ export const FaqUtil = [
   {
     question: "How are payments handled?",
     answer:
-      "Payments are made using Kaia tokens, a native cryptocurrency. Buyers can seamlessly purchase toolkits or book time slots through the platform.",
+      "Payments are made using KAIA tokens, a native cryptocurrency. Buyers can seamlessly purchase toolkits or book time slots through the platform.",
   },
   {
     question: "Is there social proof for creators?",
