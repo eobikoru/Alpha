@@ -10,7 +10,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const Consultation = () => {
-  const { writeContract,data:hash, isPending, isSuccess } = useWriteContract();
+  const { writeContract,data:hash, isPending } = useWriteContract();
   const [formData, setFormData] = useState({
     consultationPrice: "",
     availableSlots: [] as number[],
@@ -18,7 +18,7 @@ const Consultation = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const {isLoading, isSuccess:isSuccessHash} = useWaitForTransactionReceipt({
+  const {isSuccess:isSuccessHash} = useWaitForTransactionReceipt({
     hash,
   })
   useEffect(() => {

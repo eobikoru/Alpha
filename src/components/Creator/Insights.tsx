@@ -34,6 +34,7 @@ const Insights = () => {
     args: [address],
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { totalEarnings, toolSales, consultationRevenue }: any = data || {};
 
   console.log(data, address, isLoading);
