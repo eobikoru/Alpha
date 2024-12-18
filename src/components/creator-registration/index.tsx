@@ -13,7 +13,7 @@ import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-import { useWriteContract, useTransactionReceipt, useWaitForTransactionReceipt  } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt  } from "wagmi";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/constant/constant";
 import { ClipLoader } from "react-spinners";
 import { message } from "antd";
@@ -29,8 +29,8 @@ interface FormData {
 
 const CreatorRegistration = () => {
   const router = useRouter();
-  const { writeContract, data:hash, isPending, isError, isSuccess } = useWriteContract();
-  const { isLoading, isSuccess:isSuccessHash} = useWaitForTransactionReceipt({
+  const { writeContract, data:hash, isPending, isError,  } = useWriteContract();
+  const { isSuccess:isSuccessHash} = useWaitForTransactionReceipt({
     hash, 
   });
   const [formData, setFormData] = useState<FormData>({

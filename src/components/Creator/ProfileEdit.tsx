@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -12,28 +12,32 @@ import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constant/constant";
 import Profile from "./Profile";
 import { message } from "antd";
 
+// Define the structure of the contract data
+interface CreatorProfile {
+  name: string;
+  bio: string;
+  photoHash: string;
+  twitterHandle: string;
+  githubHandle: string;
+}
+
 const ProfileEdit = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { address } = useAccount();
 
+  // Define the contract read call with typed response
   const { data } = useReadContract({
     abi: CONTRACT_ABI,
     address: CONTRACT_ADDRESS,
     functionName: "getCreatorProfile",
     args: [address],
-  });
+  }) as { data: CreatorProfile };
 
   const [messageApi, contextHolder] = message.useMessage();
   const { writeContract, isPending, isError, isSuccess } = useWriteContract();
 
   // State for form data
-  const [formData, setFormData] = useState<{
-    name: string;
-    bio: string;
-    photoHash: string; // Updated to hold IPFS hash only
-    twitterHandle: string;
-    githubHandle: string;
-  }>({
+  const [formData, setFormData] = useState<CreatorProfile>({
     name: "",
     bio: "",
     photoHash: "",
@@ -142,6 +146,7 @@ const ProfileEdit = () => {
       if (files && files[0]) {
         try {
           await handleSubmission(files[0]); // Upload file to IPFS
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           setErrorMessage("File upload failed.");
         }
