@@ -114,7 +114,7 @@ const Consultation = () => {
              
             </div>
             <div>
-              <Label htmlFor="consultationPrice">Hourly Rate (in Kaia)</Label>
+              <Label htmlFor="consultationPrice">Hourly Rate (in KAIA)</Label>
               <Input
                 id="consultationPrice"
                 type="number"

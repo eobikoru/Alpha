@@ -11,7 +11,7 @@ export const TestimonialsUtil = [
     name: "Sarah Johnson",
     role: "NFT Artist",
     quote:
-      "I've been able to monetize my expertise and grow my audience like never before in the decentralized space.",
+      "I've been able to monetize my expertise and grow my audience like never before because of the direct access this platform provides.",
     avatar:
       "https://w7.pngwing.com/pngs/129/292/png-transparent-female-avatar-girl-face-woman-user-flat-classy-users-icon.png",
   },

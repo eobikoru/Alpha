@@ -38,8 +38,8 @@ const HeroSection = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        Empower creators and KOLs to share knowledge, offer curated toolkits,
-        and book consultations in the decentralized world.
+        Alpha empowers creators and KOLs to share knowledge, offer curated toolkits,
+        and book consultations directlty with their audience.
       </motion.p>
       <motion.div
         className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
