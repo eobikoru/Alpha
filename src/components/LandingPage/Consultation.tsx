@@ -1,26 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useWriteContract ,useWaitForTransactionReceipt} from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, useContractRead } from "wagmi";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constant/constant";
 import { message } from "antd";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const Consultation = () => {
-  const { writeContract,data:hash, isPending } = useWriteContract();
+  const { writeContract, data: hash, isPending } = useWriteContract();
   const [formData, setFormData] = useState({
-    consultationPrice: "",
     availableSlots: [] as number[],
   });
   const [messageApi, contextHolder] = message.useMessage();
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const {isSuccess:isSuccessHash} = useWaitForTransactionReceipt({
+  const { isSuccess: isSuccessHash } = useWaitForTransactionReceipt({
     hash,
-  })
+  });
+
+  const [showSlots, setShowSlots] = useState(false);
+  const { data: consultationSlots, isLoading } = useContractRead({
+    abi: CONTRACT_ABI,
+    address: CONTRACT_ADDRESS,
+    functionName: "getAllConsultationSlots",
+  });
+
   useEffect(() => {
     if (isSuccessHash) {
       messageApi.open({
@@ -32,33 +39,29 @@ const Consultation = () => {
         consultationPrice: "",
         availableSlots: [],
       });
-      setSelectedDate(null); 
+      setSelectedDate(null);
     }
   }, [isSuccessHash, messageApi]);
-
 
   useEffect(() => {
     const isFormIncomplete = Object.values(formData).some((value) => !value || value.length === 0);
     setIsButtonDisabled(isFormIncomplete);
   }, [formData]);
 
-  // Convert ISO date to Unix timestamp
   const toUnixTimestamp = (date: Date): number => {
     return Math.floor(date.getTime() / 1000);
   };
 
-  // Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { id, value } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [id]: value,
+  //   }));
+  // };
 
-  // Handle date selection
   const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date); // Update selected date for display
+    setSelectedDate(date);
     if (date) {
       const timestamp = toUnixTimestamp(date);
       setFormData((prev) => ({
@@ -73,7 +76,6 @@ const Consultation = () => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -81,15 +83,19 @@ const Consultation = () => {
         abi: CONTRACT_ABI,
         address: CONTRACT_ADDRESS,
         functionName: "setConsultationAvailability",
-        args: [true, formData.consultationPrice, formData.availableSlots],
+        args: [formData.availableSlots],
       });
     } catch (error) {
       console.error(error);
     }
   };
 
+  const toggleShowSlots = () => {
+    setShowSlots((prev) => !prev);
+  };
+
   return (
-    <div>
+    <div className="mb-36">
       {contextHolder}
       <Card>
         <CardHeader>
@@ -100,21 +106,20 @@ const Consultation = () => {
             <div>
               <Label>Available Slots</Label>
               <div>
-                 <DatePicker
-                selected={selectedDate}
-                onChange={handleDateChange}
-                placeholderText="Select date and time"
-                isClearable
-                showTimeSelect
-                timeFormat="HH:mm"
-                dateFormat="MMMM d, yyyy h:mm aa"
-                className="border w-full px-3 py-2 rounded"
-              />
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={handleDateChange}
+                  placeholderText="Select date and time"
+                  isClearable
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  dateFormat="MMMM d, yyyy h:mm aa"
+                  className="border w-full px-3 py-2 rounded"
+                />
               </div>
-             
             </div>
             <div>
-              <Label htmlFor="consultationPrice">Hourly Rate (in KAIA)</Label>
+              {/* <Label htmlFor="consultationPrice">Hourly Rate (in KAIA)</Label>
               <Input
                 id="consultationPrice"
                 type="number"
@@ -122,7 +127,7 @@ const Consultation = () => {
                 placeholder="0.5"
                 value={formData.consultationPrice}
                 onChange={handleChange}
-              />
+              /> */}
             </div>
             <Button
               type="submit"
@@ -134,6 +139,34 @@ const Consultation = () => {
           </form>
         </CardContent>
       </Card>
+
+      {/* <div className="mt-6">
+        <Button onClick={toggleShowSlots}>{showSlots ? "Hide Slots" : "See All Slots"}</Button>
+      </div>
+
+      {showSlots && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+          {isLoading ? (
+            <p>Loading slots...</p>
+          ) : consultationSlots && Array.isArray(consultationSlots) && consultationSlots.length > 0 ? (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            consultationSlots.map((slot: any) => (
+              <Card key={slot.id}>
+                <CardHeader>
+                  <CardTitle>Slot ID: {slot.id}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Creator: {slot.creator}</p>
+                  <p>Date: {new Date(slot.timestamp * 1000).toLocaleString()}</p>
+                  <p>Status: {slot.isBooked ? "Booked" : "Available"}</p>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p>No consultation slots available.</p>
+          )}
+        </div>
+      )} */}
     </div>
   );
 };
