@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 // import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useWriteContract, useWaitForTransactionReceipt, useContractRead } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt} from "wagmi";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constant/constant";
 import { message } from "antd";
 import DatePicker from "react-datepicker";
@@ -21,12 +21,12 @@ const Consultation = () => {
     hash,
   });
 
-  const [showSlots, setShowSlots] = useState(false);
-  const { data: consultationSlots, isLoading } = useContractRead({
-    abi: CONTRACT_ABI,
-    address: CONTRACT_ADDRESS,
-    functionName: "getAllConsultationSlots",
-  });
+  // const [showSlots, setShowSlots] = useState(false);
+  // const { data: consultationSlots, isLoading } = useContractRead({
+  //   abi: CONTRACT_ABI,
+  //   address: CONTRACT_ADDRESS,
+  //   functionName: "getAllConsultationSlots",
+  // });
 
   useEffect(() => {
     if (isSuccessHash) {
@@ -36,7 +36,7 @@ const Consultation = () => {
       });
 
       setFormData({
-        consultationPrice: "",
+        // consultationPrice: "",
         availableSlots: [],
       });
       setSelectedDate(null);
@@ -90,9 +90,9 @@ const Consultation = () => {
     }
   };
 
-  const toggleShowSlots = () => {
-    setShowSlots((prev) => !prev);
-  };
+  // const toggleShowSlots = () => {
+  //   setShowSlots((prev) => !prev);
+  // };
 
   return (
     <div className="mb-36">
