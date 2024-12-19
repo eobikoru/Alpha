@@ -1,16 +1,24 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "../ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/constant/constant";
-import { useWriteContract } from "wagmi";
+import { useContractRead, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { message } from "antd";
+import { UserOutlined, TagsOutlined, DollarCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const ManageTool = () => {
-  const { writeContract, isPending, isError, isSuccess } = useWriteContract();
+  const { writeContract, isPending, data: hash, isError } = useWriteContract();
+  const { data: tools } = useContractRead({
+    abi: CONTRACT_ABI,
+    address: CONTRACT_ADDRESS,
+    functionName: "getAllTools",
+  });
+  const { isSuccess: isSuccessHash } = useWaitForTransactionReceipt({
+    hash,
+  });
+
   const [formData, setFormData] = useState({
     toolName: "",
     toolDescription: "",
@@ -18,11 +26,12 @@ const ManageTool = () => {
     toolPrice: "",
   });
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [showTools, setShowTools] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
   // Success Message
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccessHash) {
       messageApi.open({
         type: "success",
         content: "Tool added successfully!",
@@ -34,7 +43,7 @@ const ManageTool = () => {
         toolPrice: "",
       });
     }
-  }, [isSuccess, messageApi]);
+  }, [isSuccessHash, messageApi]);
 
   useEffect(() => {
     if (isError) {
@@ -83,6 +92,10 @@ const ManageTool = () => {
         content: "Failed to add tool. Please try again.",
       });
     }
+  };
+
+  const toggleToolsVisibility = () => {
+    setShowTools(!showTools);
   };
 
   return (
@@ -143,6 +156,33 @@ const ManageTool = () => {
             </form>
           </CardContent>
         </Card>
+
+        <div className="mt-6">
+          <Button onClick={toggleToolsVisibility}>
+            {showTools ? "Hide Tools" : "See All Tools"}
+          </Button>
+        </div>
+
+        {showTools && (
+          <div className="grid gap-4 mt-4 grid-cols-1  md:grid-cols-2 lg:grid-cols-3">
+            {tools && Array.isArray(tools) && tools.length > 0 ? (
+              tools.map((tool: { id: number; name: string; description: string; category: string; price: number }) => (
+                <Card key={tool.id}>
+                  <CardContent className="p-4">
+                    <div>
+                      <p><strong><UserOutlined /> Name:</strong> {tool.name}</p>  
+                      <p><strong><TagsOutlined /> Category:</strong> {tool.category}</p>
+                      <p><strong><DollarCircleOutlined /> Price:</strong> {tool.price} KAIA</p>
+                      <p><strong><InfoCircleOutlined /> Description:</strong> {tool.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <p>No tools available.</p>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
